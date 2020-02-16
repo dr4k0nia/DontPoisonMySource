@@ -17,7 +17,7 @@ The tool will check the files for Exec, PreBuildEvent and PostBuildEvent paramet
       1. [!] {parameter} ⯈ {filepath}
       2.  ↳ {content of parameter}
 
-You can also just drap the file you want to decompress or extract and decompress resources from onto the executable.
+Files can be opened via drag onto the executable.
 
 ## Dependencies
 - [Colorful.Console](https://github.com/tomakita/Colorful.Console)
