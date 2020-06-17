@@ -6,92 +6,88 @@ using Console = Colorful.Console; //Colorful Console for better Color formatting
 
 namespace DontPoisonMySource
 {
-    internal class Program
+    internal static class Program
     {
-        private static void Main(string[] args)
+        private static void Main( string[] args )
         {
             //Use Unicode encoding to support the arrow symbols :)
             Console.OutputEncoding = System.Text.Encoding.Unicode;
 
-            if (args.Length == 0)
+            if ( args.Length == 0 )
             {
-                Console.WriteLine("Usage: " + AppDomain.CurrentDomain.FriendlyName + " file1 file2 ...");
+                Console.WriteLine( "Usage: " + AppDomain.CurrentDomain.FriendlyName + " file1 file2 ..." );
                 Console.ReadKey();
                 return;
             }
 
-            for (int i = 0; i < args.Length; i++)
+            foreach ( var t in args )
             {
-                if (!File.Exists(args[i]))
+                if ( !File.Exists( t ) )
                 {
-                    WriteFormattedOutput("File not found", args[i], Color.IndianRed);
-                    Console.ReadKey();
+                    WriteFormattedOutput( "File not found", t, Color.IndianRed );
                     continue;
                 }
 
-                if (!args[i].EndsWith("proj"))
+                if ( !t.EndsWith( "proj" ) )
                 {
-                    WriteFormattedOutput("Unsupported file type", args[i], Color.IndianRed);
-                    Console.ReadKey();
+                    WriteFormattedOutput( "Unsupported file type", t, Color.IndianRed );
                     continue;
                 }
 
                 int count = 0;
-
-                using (StreamReader reader = new StreamReader(args[i]))
+                using ( var reader = new StreamReader( t ) )
                 {
                     string line;
-                    while ((line = reader.ReadLine()) != null)
+                    while ( ( line = reader.ReadLine() ) != null )
                     {
-                        Match m = Regex.Match(line, "<(.*)Exec(.*?)>");
-                        Match m1 = Regex.Match(line, "<PreBuildEvent>(.*?)</PreBuildEvent>");
-                        Match m2 = Regex.Match(line, "<PostBuildEvent>(.*?)</PostBuildEvent>");
-                        if (m.Success)
+                        var m = Regex.Match( line, "<(.*)Exec(.*?)>" );
+                        var m1 = Regex.Match( line, "<PreBuildEvent>(.*?)</PreBuildEvent>" );
+                        var m2 = Regex.Match( line, "<PostBuildEvent>(.*?)</PostBuildEvent>" );
+                        if ( m.Success )
                         {
-                            WriteFormattedOutput("Exec", args[i], Color.Red);
-                            Console.WriteLine(" ┕► " + line);
+                            WriteFormattedOutput( "Exec", t, Color.Red );
+                            Console.WriteLine( " ┕► " + line );
                             count++;
                         }
-                        else if (m1.Success)
+                        else if ( m1.Success )
                         {
-                            WriteFormattedOutput("PreBuildEvent", args[i], Color.Orange);
-                            Console.WriteLine(" ┕► " + m1.Groups[1].Value);
+                            WriteFormattedOutput( "PreBuildEvent", t, Color.Orange );
+                            Console.WriteLine( " ┕► " + m1.Groups[1].Value );
                             count++;
                         }
-                        else if (m2.Success)
+                        else if ( m2.Success )
                         {
-                            WriteFormattedOutput("PostBuildEvent", args[i], Color.Orange);
-                            Console.WriteLine(" ┕► " + m2.Groups[1].Value);
+                            WriteFormattedOutput( "PostBuildEvent", t, Color.Orange );
+                            Console.WriteLine( " ┕► " + m2.Groups[1].Value );
                             count++;
                         }
-                    }
-                    if (count == 0)
-                    {
-                        string template = "{0} {1} ► {2}";
-                        Colorful.Formatter[] output = new Colorful.Formatter[]
-                        {
-                                new Colorful.Formatter("[i]", Color.LimeGreen),
-                                new Colorful.Formatter("nothing found", Color.Green),
-                                new Colorful.Formatter(args[i], Color.Yellow),
-                        };
-                        Console.WriteLineFormatted(template, Color.White, output);
                     }
 
-                    Console.ReadKey();
+                    if ( count != 0 ) continue;
+
+                    const string template = "{0} {1} ► {2}";
+                    var output = new Colorful.Formatter[]
+                    {
+                        new Colorful.Formatter( "[i]", Color.LimeGreen ),
+                        new Colorful.Formatter( "nothing found", Color.Green ),
+                        new Colorful.Formatter( t, Color.Yellow ),
+                    };
+                    Console.WriteLineFormatted( template, Color.White, output );
                 }
             }
+            Console.ReadKey();
         }
 
-        private static void WriteFormattedOutput(string type, string file, Color typeColor)
+        private static void WriteFormattedOutput( string type, string file, Color typeColor )
         {
-            string template = "{0} {1} ► {2}";
-            Colorful.Formatter[] output = new Colorful.Formatter[]
+            const string template = "{0} {1} ► {2}";
+            var output = new Colorful.Formatter[]
             {
-                                new Colorful.Formatter("[!]", Color.OrangeRed),
-                                new Colorful.Formatter(type, typeColor),
-                                new Colorful.Formatter(file, Color.Yellow),
+                new Colorful.Formatter( "[!]", Color.OrangeRed ),
+                new Colorful.Formatter( type, typeColor ),
+                new Colorful.Formatter( file, Color.Yellow ),
             };
-            Console.WriteLineFormatted(template, Color.White, output);
+            Console.WriteLineFormatted( template, Color.White, output );
         }
     }
 }
